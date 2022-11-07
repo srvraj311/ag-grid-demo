@@ -30,6 +30,11 @@ import User from './User';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
+  // For accessing the Grid's API
+  @ViewChild(AgGridAngular) agGrid!: AgGridAngular;
+
+  constructor(private http: HttpClient, private ui: UiService) {}
+
   // Each Column Definition results in one Column.
   public columnDefs: ColDef[] = [
     {
@@ -93,27 +98,12 @@ export class AppComponent {
   // Data that gets displayed in the grid
   public rowData$!: Observable<User[]>;
 
-  // For accessing the Grid's API
-  @ViewChild(AgGridAngular) agGrid!: AgGridAngular;
-
-  constructor(private http: HttpClient, private ui: UiService) {}
-
   // Example load data from sever
   onGridReady(params: GridReadyEvent) {
     this.rowData$ = this.http.get<User[]>('http://localhost:3000/users');
     this.agGrid.api.paginationSetPageSize(10);
     //console.log('params: ' , params)
     setTimeout(() => this.updatePagination(), 1000);
-  }
-
-  updatePagination() {
-    this.page = this.agGrid.api.paginationGetCurrentPage() + 1;
-    this.total = this.agGrid.api.paginationGetTotalPages();
-  }
-
-  // Example of consuming Grid Event
-  onCellClicked(e: CellClickedEvent): void {
-    console.log('cellClicked', e);
   }
 
   // Example using Grid's API
@@ -123,10 +113,6 @@ export class AppComponent {
 
   refresh() {
     this.agGrid.api.redrawRows();
-  }
-
-  onCellDoubleClicked($event: CellDoubleClickedEvent<any>) {
-    console.log('Double Click : \n', $event.value);
   }
 
   // Sample method implemented
@@ -144,10 +130,6 @@ export class AppComponent {
     );
   }
 
-  onEditTriggered() {
-    this.undoCound = this.agGrid.api.getCurrentUndoSize();
-  }
-
   undoCound: number = 0;
   onUndoClick() {
     this.agGrid.api.undoCellEditing();
@@ -155,8 +137,16 @@ export class AppComponent {
   }
 
   // Pagination
+  //
+  //
+
   page: number = 0;
   total: number = 0;
+
+  updatePagination() {
+    this.page = this.agGrid.api.paginationGetCurrentPage() + 1;
+    this.total = this.agGrid.api.paginationGetTotalPages();
+  }
 
   goToFirst() {
     this.agGrid.api.paginationGoToFirstPage();
@@ -173,8 +163,24 @@ export class AppComponent {
   goRight() {
     this.agGrid.api.paginationGoToNextPage();
   }
+
+  //
+  //
+  //
   // Grid Events
+  onCellDoubleClicked($event: CellDoubleClickedEvent<any>) {
+    console.log('Double Click : \n', $event.value);
+  }
+
   onCellValueChanged(event: CellValueChangedEvent<User>) {
     this.ui.showSnack('Cell Value Changed');
+  }
+
+  onEditTriggered() {
+    this.undoCound = this.agGrid.api.getCurrentUndoSize();
+  }
+
+  onCellClicked(e: CellClickedEvent): void {
+    console.log('cellClicked', e);
   }
 }
