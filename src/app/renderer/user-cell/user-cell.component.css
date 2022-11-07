@@ -1,0 +1,13 @@
+img {
+  vertical-align: center;
+  height: 100%;
+  padding: 10px;
+  border-radius: 50%;
+}
+div {
+  display: flex;
+  height: 100%;
+  justify-content: left;
+  align-items: center;
+}
+
