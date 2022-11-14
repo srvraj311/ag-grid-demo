@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AgGridModule } from 'ag-grid-angular';
 import { AppComponent } from './app.component';
-// import 'ag-grid-enterprise';
 import { UserCellComponent } from './renderer/user-cell/user-cell.component';
 import { UserCellEditorComponent } from './editor/user-cell-editor/user-cell-editor.component';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +13,7 @@ import { CheckboxFilterComponent } from './filter/checkbox-filter/checkbox-filte
 import { CellRatingComponent } from './renderer/cell-rating/cell-rating.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { UiService } from 'src/Ui/ui.service';
+import { UiService } from 'src/app/Ui/ui.service';
 @NgModule({
   declarations: [
     AppComponent,

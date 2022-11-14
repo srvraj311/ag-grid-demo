@@ -17,6 +17,21 @@
       <i class="bi bi-arrow-counterclockwise"></i>
       Undo Edit
     </button>
+
+    <button
+      *ngIf="!isDynamicData"
+      class="btn btn-success m-2"
+      (click)="enableDynamicData()"
+    >
+      Enable Dynamic Data
+    </button>
+    <button
+      *ngIf="isDynamicData"
+      class="btn btn-danger m-2"
+      (click)="disableDynamicData()"
+    >
+      Disable Dynamic Data
+    </button>
   </div>
 
   <div class="container-fluid myGrid">

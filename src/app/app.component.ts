@@ -1,20 +1,17 @@
-import { UiService } from 'src/Ui/ui.service';
+import { UiService } from 'src/app/Ui/ui.service';
 import { CellRatingComponent } from './renderer/cell-rating/cell-rating.component';
 import { HttpClient } from '@angular/common/http';
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
   CellClickedEvent,
   CellDoubleClickedEvent,
   CellValueChangedEvent,
   ColDef,
-  ColumnGroup,
   GridReadyEvent,
-  IStatusPanel,
   RowNode,
-  StatusPanelDef,
 } from 'ag-grid-community';
-import { filter, map, Observable } from 'rxjs';
+import { map, Observable, Subscription } from 'rxjs';
 import { UserCellComponent } from './renderer/user-cell/user-cell.component';
 import { UserCellEditorComponent } from './editor/user-cell-editor/user-cell-editor.component';
 import { UserCellFilterComponent } from './filter/user-cell-filter/user-cell-filter.component';
@@ -29,7 +26,7 @@ import User from './User';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   // For accessing the Grid's API
   @ViewChild(AgGridAngular) agGrid!: AgGridAngular;
 
@@ -46,7 +43,7 @@ export class AppComponent {
     {
       field: 'title',
       checkboxSelection: true,
-      valueGetter: (params) => capitalise(params.data.title),
+      valueGetter: (params) => capitalise(params.data['title']),
       filter: CheckboxFilterComponent,
     },
     {
@@ -63,7 +60,10 @@ export class AppComponent {
       field: 'gender',
       cellEditor: 'agSelectCellEditor',
       cellEditorParams: {
-        values: ['Male', 'Female'],
+        values: ['male', 'female'],
+      },
+      onCellValueChanged: () => {
+        this.agGrid.api.redrawRows();
       },
     },
     { field: 'email' },
@@ -76,6 +76,11 @@ export class AppComponent {
     //The valueParser will ensure that the new entered value after editing will be converted to number.
     {
       field: 'birthdate',
+      valueGetter: (params) => {
+        let timeStamp = params.data.birthdate * 1000;
+        let date = new Date(timeStamp);
+        return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+      },
       valueParser: (params) => Number(params.newValue),
     },
     { field: 'location.city', headerName: 'City' },
@@ -182,5 +187,36 @@ export class AppComponent {
 
   onCellClicked(e: CellClickedEvent): void {
     console.log('cellClicked', e);
+  }
+
+  dynamicUpdateSubscription!: Subscription;
+  isDynamicData: boolean = false;
+  enableDynamicData() {
+    this.isDynamicData = true;
+    setInterval(() => {
+      if (this.isDynamicData) {
+        this.dynamicUpdateSubscription = this.rowData$
+          .pipe(
+            map((item) => {
+              item.map((user) => {
+                user.phone_number = `9${Math.floor(
+                  Math.random() * 1000000000
+                )}`;
+                return user;
+              });
+              return item;
+            })
+          )
+          .subscribe((d) => this.agGrid.api.setRowData(d));
+      }
+    }, 1000);
+  }
+  disableDynamicData() {
+    this.isDynamicData = false;
+    this.dynamicUpdateSubscription.unsubscribe();
+  }
+
+  ngOnDestroy(): void {
+    this.dynamicUpdateSubscription.unsubscribe();
   }
 }
